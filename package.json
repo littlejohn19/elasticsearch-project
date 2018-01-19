@@ -10,8 +10,10 @@
     "cors": "2.5.3",
     "elasticsearch": "13.3.1",
     "express": "4.11.2",
+    "http-as-promised": "1.1.0",
+    "lodash": "4.17.4",
     "morgan": "1.5.1",
-    "lodash": "4.17.4"
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {
     "nodemon": "1.14.11"

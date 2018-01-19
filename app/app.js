@@ -5,7 +5,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import config from './config';
-import { save } from './esDAO';
+import { runIndex } from './esDAO';
 
 const app = express();
 app.use(morgan('dev'));
@@ -17,7 +17,7 @@ app.listen(config.port);
 
 app.route('/index')
   .get(function (req, res) {
-    res.send(save())
+    res.send(runIndex())
   });
 
 module.exports = app;
