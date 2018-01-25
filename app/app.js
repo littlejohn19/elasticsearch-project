@@ -30,28 +30,36 @@ let homePage = 'https://pl.wikipedia.org'
 app.route('/')
   .get(function (req, res) {
 
-    let requestConfig = {
-      url: homePage + '/wiki/Portal:Kategorie_G%C5%82%C3%B3wne'
-    };
-    request.get(requestConfig).spread((response, data) => {
-      
-      let doc = new dom().parseFromString(data);
-      let mainCategories = xpath.select('//td[@width="70%"]//p/a', doc);
+    // crawlWholeWikipedia();
 
-      mainCategories.forEach(mainCategory => {
-
-        let crawlObject = {
-          name: xpath.select('text()', mainCategory),
-          url: homePage + xpath.select('string(@href)', mainCategory)
-        }
-        crawlCategory(crawlObject)
-        
-      })
-    })
+    let crawlObject = {
+      name: 'Religioznawstwo',
+      url: 'https://pl.wikipedia.org/wiki/Kategoria:Religioznawstwo'
+    }
+    console.log("CATEGORY: " + crawlObject.name + " \t " + crawlObject.url)
+    crawlCategory(crawlObject)
 
     res.send("hello")
-  });
+  }
+);
 
+function crawlWholeWikipedia() {
+  let requestConfig = {
+    url: homePage + '/wiki/Portal:Kategorie_G%C5%82%C3%B3wne'
+  };
+  request.get(requestConfig).spread((response, data) => {
+    let doc = new dom().parseFromString(data);
+    let mainCategories = xpath.select('//td[@width="70%"]//p/a', doc);
+
+    mainCategories.forEach(mainCategory => {
+      let crawlObject = {
+        name: xpath.select('text()', mainCategory),
+        url: homePage + xpath.select('string(@href)', mainCategory)
+      }
+      crawlCategory(crawlObject)
+    })
+  })
+}
 
 function crawlCategory(crawlObject) {
   let categoryRequestConfig = {
@@ -67,6 +75,7 @@ function crawlCategory(crawlObject) {
         name: xpath.select('text()', subcategory),
         url: homePage + xpath.select('string(@href)', subcategory)
       }
+      console.log("CATEGORY: " + crawlObject.name + " \t " + crawlObject.url)
       crawlCategory(crawlObject)
     })
     
@@ -76,15 +85,10 @@ function crawlCategory(crawlObject) {
         name: xpath.select('text()', page),
         url: homePage + xpath.select('string(@href)', page)
       }
-      crawlPage(crawlObject)
+      console.log("PAGE: " + crawlObject.name + " \t " + crawlObject.url)
     })
   });
 
 }
-
-function crawlPage(crawlObject) {
-  console.log("PAGE: " + crawlObject.name + " \t " + crawlObject.url)
-}
-
 
 module.exports = app;
