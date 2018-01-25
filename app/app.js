@@ -15,9 +15,76 @@ app.use(cors());
 
 app.listen(config.port);
 
-app.route('/index')
+// app.route('/index')
+//   .get(function (req, res) {
+//     res.send(runIndex())
+//   });
+
+// TODO: DELETE THIS IMPORTS
+import request from 'http-as-promised';
+const xpath = require('xpath');
+const dom = require('xmldom').DOMParser;
+
+let homePage = 'https://pl.wikipedia.org'
+
+app.route('/')
   .get(function (req, res) {
-    res.send(runIndex())
+
+    let requestConfig = {
+      url: homePage + '/wiki/Portal:Kategorie_G%C5%82%C3%B3wne'
+    };
+    request.get(requestConfig).spread((response, data) => {
+      
+      let doc = new dom().parseFromString(data);
+      let mainCategories = xpath.select('//td[@width="70%"]//p/a', doc);
+
+      mainCategories.forEach(mainCategory => {
+
+        let crawlObject = {
+          name: xpath.select('text()', mainCategory),
+          url: homePage + xpath.select('string(@href)', mainCategory)
+        }
+        crawlCategory(crawlObject)
+        
+      })
+    })
+
+    res.send("hello")
   });
+
+
+function crawlCategory(crawlObject) {
+  let categoryRequestConfig = {
+    url: crawlObject.url
+  };
+  request.get(categoryRequestConfig).spread((response, data) => {
+
+    let domObject = new dom().parseFromString(data);
+    let subcategories = xpath.select('//div[@id="mw-subcategories"]//div[@class="mw-category-group"]//a', domObject)
+    subcategories.forEach(subcategory => {
+
+      let crawlObject = {
+        name: xpath.select('text()', subcategory),
+        url: homePage + xpath.select('string(@href)', subcategory)
+      }
+      crawlCategory(crawlObject)
+    })
+    
+    let pages = xpath.select('//div[@id="mw-pages"]//div[@class="mw-category-group"]//a', domObject)
+    pages.forEach(page => {
+      let crawlObject = {
+        name: xpath.select('text()', page),
+        url: homePage + xpath.select('string(@href)', page)
+      }
+      crawlPage(crawlObject)
+    })
+  });
+
+}
+
+function crawlPage(crawlObject) {
+  console.log("PAGE: " + crawlObject.name + " \t " + crawlObject.url)
+}
+
 
 module.exports = app;
