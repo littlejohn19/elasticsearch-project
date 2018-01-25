@@ -3,6 +3,9 @@ import config from './config';
 import elasticsearch from 'elasticsearch';
 import request from 'http-as-promised';
 
+const xpath = require('xpath');
+const dom = require('xmldom').DOMParser;
+
 const parseString = require('xml2js').parseString;
 const es = new elasticsearch.Client(_.cloneDeep(config.es.options));
 
@@ -41,6 +44,13 @@ function runIndex() {
     url: 'https://en.wikipedia.org/w/api.php?format=xml&action=query&prop=categories&titles=Google'
   };
 
+  let xml = '<book><title>Harry Potter</title></book>';
+  let doc = new dom().parseFromString(xml);
+  let nodes = xpath.select('//title', doc);
+
+  console.log(nodes[0].localName + ': ' + nodes[0].firstChild.data);
+  console.log('Node: ' + nodes[0].toString());
+
   return request.get(requestConfig).spread((response, data) => {
     parseString(data, function (err, result) {
       let resp = JSON.stringify(result);
@@ -53,7 +63,7 @@ function runIndex() {
       //   save(key, category);
       // });
 
-      return get(4).then(results => {
+      return get(3).then(results => {
         console.log(results);
       });
     });
