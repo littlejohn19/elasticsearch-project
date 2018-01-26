@@ -31,12 +31,12 @@ Below are some examples of events received from the controller
 
 ## /api/index | GET
 
-Carrying out the indexation
+Indexing data
 
 ## /api/index/find | GET
 
-Downloading all values
+Get all values
 
-## /api/index/find/one | GET
+## /api/index/find/:id | GET
 
-Downloading one value
+Get one value
