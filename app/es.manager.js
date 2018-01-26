@@ -28,6 +28,12 @@ function getAll() {
   })
 }
 
+function getPhrase(phrase) {
+  return esDAO.phraseScroll(phrase).then(result => {
+    return result;
+  })
+}
+
 
 function crawlWholeWikipedia() {
   let requestConfig = {
@@ -110,5 +116,6 @@ function crawlCategory(crawlObject) {
 export default {
   runIndex: runIndex,
   getOne: getOne,
-  getAll: getAll
+  getAll: getAll,
+  getPhrase: getPhrase
 };

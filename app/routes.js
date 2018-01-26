@@ -25,6 +25,15 @@ const indexEndpoint = (router) => {
       response.status(404).send(error);
     });
   });
+  router.route('/api/index/phrase').post((request, response) => {
+    console.log(request.body);
+    console.log('aaa');
+    manager.getPhrase(request.body.phrase).then((result) => {
+      response.status(200).send(result);
+    }).catch((error) => {
+      response.status(404).send(error);
+    });
+  });
 };
 
 

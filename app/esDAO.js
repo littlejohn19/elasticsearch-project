@@ -1,12 +1,7 @@
 import * as _ from 'lodash';
 import config from './config';
 import elasticsearch from 'elasticsearch';
-import request from 'http-as-promised';
 
-const xpath = require('xpath');
-const dom = require('xmldom').DOMParser;
-
-const parseString = require('xml2js').parseString;
 const es = new elasticsearch.Client(_.cloneDeep(config.es.options));
 
 function save(key, value) {
@@ -64,16 +59,52 @@ function scroll() {
         }, getMoreUntilDone);
 
       } else {
-
         console.log('all done', allRecords);
+        console.log(allRecords.length);
       }
     });
+  }).then(() => {
+    return allRecords;
   });
 }
 
+function phraseScroll(phrase) {
+  let allRecords = [];
+
+  return Promise.resolve().then(() => {
+    return es.search({
+      index: config.es.index,
+      type: 'config',
+      scroll: '10s',
+      body: {
+        query: {
+          "match" : { "category": phrase }
+        }
+      }
+    }, function getMoreUntilDone(error, response) {
+      response.hits.hits.forEach(function (hit) {
+        allRecords.push(hit);
+      });
+
+      if (response.hits.total !== allRecords.length) {
+        return es.scroll({
+          scrollId: response._scroll_id,
+          scroll: '10s'
+        }, getMoreUntilDone);
+
+      } else {
+        console.log('all done', allRecords);
+        console.log(allRecords.length);
+      }
+    });
+  }).then(() => {
+    return allRecords;
+  });
+}
 
 export default {
   get: get,
   save: save,
-  scroll: scroll
+  scroll: scroll,
+  phraseScroll: phraseScroll
 };
