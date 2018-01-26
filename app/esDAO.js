@@ -94,7 +94,7 @@ function phraseScroll(phrase) {
 
       } else {
         console.log('all done', allRecords);
-        console.log(allRecords.length);
+        console.log('Znaleziono wpisów: ', allRecords.length);
       }
     });
   }).then(() => {

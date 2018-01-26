@@ -40,3 +40,12 @@ Get all values
 ## /api/index/find/:id | GET
 
 Get one value
+
+## /api/index/phrase | POST
+
+Get values by phrase
+
+example payload: {
+                 	"phrase": "Bóstwa"
+                 }
+
