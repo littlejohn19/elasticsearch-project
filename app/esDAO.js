@@ -16,7 +16,8 @@ function save(key, value) {
     id: key,
     body: {
       value
-    }
+    },
+    refresh: true
   };
   return es.index(params);
 }
@@ -38,39 +39,41 @@ function get(key) {
   });
 }
 
-function runIndex() {
+function scroll() {
+  let allRecords = [];
 
-  let requestConfig = {
-    url: 'https://en.wikipedia.org/w/api.php?format=xml&action=query&prop=categories&titles=Google'
-  };
-
-  let xml = '<book><title>Harry Potter</title></book>';
-  let doc = new dom().parseFromString(xml);
-  let nodes = xpath.select('//title', doc);
-
-  console.log(nodes[0].localName + ': ' + nodes[0].firstChild.data);
-  console.log('Node: ' + nodes[0].toString());
-
-  return request.get(requestConfig).spread((response, data) => {
-    parseString(data, function (err, result) {
-      let resp = JSON.stringify(result);
-      let obj = JSON.parse(resp);
-      let categories = obj.api.query[0].pages[0].page[0].categories[0].cl;
-
-      console.log(categories);
-      // _.forEach(categories, (value, key) => {
-      //   let category = value['$'].title;
-      //   save(key, category);
-      // });
-
-      return get(3).then(results => {
-        console.log(results);
+  return Promise.resolve().then(() => {
+    return es.search({
+      index: config.es.index,
+      type: 'config',
+      scroll: '10s',
+      body: {
+        query: {
+          "match_all": {}
+        }
+      }
+    }, function getMoreUntilDone(error, response) {
+      response.hits.hits.forEach(function (hit) {
+        allRecords.push(hit);
       });
+
+      if (response.hits.total !== allRecords.length) {
+        return es.scroll({
+          scrollId: response._scroll_id,
+          scroll: '10s'
+        }, getMoreUntilDone);
+
+      } else {
+
+        console.log('all done', allRecords);
+      }
     });
-  })
+  });
 }
 
 
-export {
-  runIndex
+export default {
+  get: get,
+  save: save,
+  scroll: scroll
 };
